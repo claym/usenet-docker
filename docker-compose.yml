@@ -9,39 +9,70 @@ services:
             - 80:80
         restart: always
 
-    sabnzbd:
-        image: linuxserver/sabnzbd:latest
-        container_name: sabnzbd
+#    sabnzbd:
+#        image: linuxserver/sabnzbd:latest
+#        container_name: sabnzbd
+#        volumes:
+#            - ${DATA}/config/sabnzbd:/config
+#            - ${DATA}/Downloads/complete:/downloads
+#            - ${DATA}/Downloads/incomplete:/incomplete-downloads
+#        ports:
+#            - 8080:8080
+#        env_file: uidgid.env
+#        environment:
+#            - EDGE=1
+#            - VIRTUAL_HOST=sabnzbd.${HOSTNAME}
+#            - VIRTUAL_PORT=8080
+#        restart: always
+
+    nzbget:
+        image: linuxserver/nzbget:latest
+        container_name: nzbget
         volumes:
-            - ${DATA}/config/sabnzbd:/config
-            - ${DATA}/Downloads/complete:/downloads
-            - ${DATA}/Downloads/incomplete:/incomplete-downloads
+            - ${DATA}/config/nzbget:/config
+            - ${DATA}/Downloads/complete:/complete
+            - ${DATA}/Downloads:/downloads
         ports:
-            - 8080:8080
+            - 6789:6789
         env_file: uidgid.env
         environment:
-            - EDGE=1
-            - VIRTUAL_HOST=sabnzbd.${HOSTNAME}
-            - VIRTUAL_PORT=8080
+            - VIRTUAL_HOST=nzbget.HOSTNAME.com
+            - VIRTUAL_PORT=6789
         restart: always
 
-    couchpotato:
-        image: linuxserver/couchpotato:latest
-        container_name: couchpotato
+#    couchpotato:
+#        image: linuxserver/couchpotato:latest
+#        container_name: couchpotato
+#        volumes:
+#            - ${DATA}/config/couchpotato:/config
+#            - ${DATA}/Downloads/complete:/downloads
+#            - ${DATA}/Movies:/movies
+#        ports:
+#            - 5050:5050
+#        env_file: uidgid.env
+#        environment:
+#            - VIRTUAL_HOST=couchpotato.${HOSTNAME}
+#            - VIRTUAL_PORT=5050
+#        restart: always
+
+    radarr:
+        image: linuxserver/radarr:latest
+        container_name: radarr
         volumes:
-            - ${DATA}/config/couchpotato:/config
-            - ${DATA}/Downloads/complete:/downloads
+            - ${DATA}/config/radarr:/config
             - ${DATA}/Movies:/movies
+            - ${DATA}/Downloads/complete:/downloads
+            - /etc/localtime:/etc/localtime:ro
         ports:
-            - 5050:5050
+            - 7878:7878
         env_file: uidgid.env
         environment:
-            - VIRTUAL_HOST=couchpotato.${HOSTNAME}
-            - VIRTUAL_PORT=5050
+            - VIRTUAL_HOST=radarr.HOSTNAME.com
+            - VIRTUAL_PORT=7878
         restart: always
     
     plex:
-        image: plexinc/pms-docker
+        image: plexinc/pms-docker:latest
         container_name: plex
         volumes:
             - ${DATA}/config/plex:/config
@@ -70,7 +101,7 @@ services:
         restart: always
 
     sonarr:
-        image: linuxserver/sonarr
+        image: linuxserver/sonarr:latest
         container_name: sonarr
         volumes:
             - ${DATA}/config/sonarr:/config
@@ -86,7 +117,7 @@ services:
         restart: always
 
     muximux:
-        image: linuxserver/muximux
+        image: linuxserver/muximux:latest
         container_name: muximux
         volumes:
             - ${DATA}/config/muximux:/config
@@ -97,7 +128,7 @@ services:
         restart: always
 
     ombi:
-        image: linuxserver/ombi
+        image: linuxserver/ombi:latest
         container_name: ombi
         volumes:
             - ${DATA}/config/ombi:/config
@@ -109,3 +140,38 @@ services:
             - VIRTUAL_HOST=ombi.${HOSTNAME}
             - VIRTUAL_PORT=3579
         restart: always
+
+    mylar:
+        image: linuxserver/mylar:latest
+        container_name: mylar
+        volumes:
+            - ${DATA}/config/mylar:/config
+            - ${DATA}/Downloads/complete:/downloads
+            - ${DATA}/comics:/comics
+            - /etc/localtime:/etc/localtime:ro
+        ports:
+            - 8090:8090
+        env_file: uidgid.env
+        environment:
+            - VIRTUAL_HOST=mylar.HOSTNAME.com
+            - VIRTUAL_PORT=8090
+        restart: always
+
+    ubooquity:
+        image: linuxserver/ubooquity:latest
+        container_name: ubooquity
+        volumes:
+            - ${DATA}/config/ubooquity:/config
+            - ${DATA}/books:/books
+            - ${DATA}/comics:/comics
+            - ${DATA}/Downloads/complete:/downloads
+            - /etc/localtime:/etc/localtime:ro
+        ports:
+            - 2202:2202
+			- 2203:2203
+        env_file: uidgid.env
+        environment:
+            - VIRTUAL_HOST=ubooquity.HOSTNAME.com
+            - VIRTUAL_PORT=2202
+        restart: always
+
