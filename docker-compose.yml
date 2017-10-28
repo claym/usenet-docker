@@ -168,7 +168,7 @@ services:
             - /etc/localtime:/etc/localtime:ro
         ports:
             - 2202:2202
-			- 2203:2203
+            - 2203:2203
         env_file: uidgid.env
         environment:
             - VIRTUAL_HOST=ubooquity.HOSTNAME.com
