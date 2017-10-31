@@ -175,3 +175,18 @@ services:
             - VIRTUAL_PORT=2202
         restart: always
 
+    nzbhydra:
+        image: linuxserver/hydra:latest
+        container_name: nzbhydra
+        volumes:
+            - ${DATA}/config/nzbhydra:/config
+            - ${DATA}/download/complete:/download
+            - /etc/localtime:/etc/localtime:ro
+        ports:
+            - 5075:5075
+        env_file: uidgid.env
+        environment:
+            - VIRTUAL_HOST=mylar.${HOSTNAME}
+            - VIRTUAL_PORT=5075
+        restart: always
+
