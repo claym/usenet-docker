@@ -3,13 +3,18 @@
 This repo is my version of another fork. Setup should be a bit easier but even the original was pretty straightforward.
 
 ## Containers
-* [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy) - Nginx Proxy
-* [linuxserver/sabnzbd](https://github.com/linuxserver/docker-sabnzbd) - SABnzbd
-* [linuxserver/couchpotato](https://github.com/linuxserver/docker-couchpotato) - CouchPotato
-* [plexinc/pms-docker](https://github.com/plexinc/pms-docker) - Plex
-* [linuxserver/sonarr](https://github.com/linuxserver/docker-sonarr) - Sonarr
-* [linuxserver/muximux](https://github.com/linuxserver/docker-muximux) - Muximux
-* [linuxserver/ombi](https://github.com/linuxserver/docker-ombi) - Ombi
+
+* [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy) - Nginx Proxy 
+* [linuxserver/sonarr](https://github.com/linuxserver/docker-sonarr) - Sonarr 
+* [linuxserver/plexpy](https://github.com/linuxserver/docker-plexpy) - Plexpy 
+* [linuxserver/hydra](https://github.com/linuxserver/docker-hydra) - NZBHydra 
+* [linuxserver/muximux](https://github.com/linuxserver/docker-muximux) - Muximux 
+* [linuxserver/radarr](https://github.com/linuxserver/docker-radarr) - Radarr 
+* [linuxserver/ombi](https://github.com/linuxserver/docker-ombi) - Ombi 
+* [linuxserver/nzbget](https://github.com/linuxserver/docker-nzbget) - NZBGet 
+* [linuxserver/nzbget](https://github.com/linuxserver/docker-ubooquity) - Ubooquity
+* [linuxserver/nzbget](https://github.com/linuxserver/docker-mylar) - Mylar
+
 
 ## Docker Setup
 1. Update `./uidgid.env` with the user and group IDs that will be running Docker

@@ -36,7 +36,7 @@ services:
             - 6789:6789
         env_file: uidgid.env
         environment:
-            - VIRTUAL_HOST=nzbget.HOSTNAME.com
+            - VIRTUAL_HOST=nzbget.${HOSTNAME}
             - VIRTUAL_PORT=6789
         restart: always
 
@@ -67,38 +67,38 @@ services:
             - 7878:7878
         env_file: uidgid.env
         environment:
-            - VIRTUAL_HOST=radarr.HOSTNAME.com
+            - VIRTUAL_HOST=radarr.${HOSTNAME}
             - VIRTUAL_PORT=7878
         restart: always
     
-    plex:
-        image: plexinc/pms-docker:latest
-        container_name: plex
-        volumes:
-            - ${DATA}/config/plex:/config
-            - ${DATA}/appdata/plex/transcodes
-            - ${DATA}/TV:/data/tvshows
-            - ${DATA}/Movies:/data/movies
-            - ${DATA}/Anime:/data/anime
-        ports:
-            - 32469:32469
-            - 32400:32400/tcp
-            - 32401:32401
-            - 3005:3005/tcp
-            - 8324:8324/tcp
-            - 1900:1900/udp
-            - 32410:32410/udp
-            - 32412:32412/udp
-            - 32413:32413/udp
-            - 32414:32414/udp
-        env_file: uidgid.env
-        environment:
-            - TZ=Europe/London
-            - VIRTUAL_HOST=plex.${HOSTNAME}
-            - VIRTUAL_PORT=32400
-            - ADVERTISE_IP=http://plex.${HOSTNAME}/
-        hostname: PlexServer
-        restart: always
+#    plex:
+#        image: plexinc/pms-docker:latest
+#        container_name: plex
+#        volumes:
+#            - ${DATA}/config/plex:/config
+#            - ${DATA}/appdata/plex/transcodes
+#            - ${DATA}/TV:/data/tvshows
+#            - ${DATA}/Movies:/data/movies
+#            - ${DATA}/Anime:/data/anime
+#        ports:
+#            - 32469:32469
+#            - 32400:32400/tcp
+#            - 32401:32401
+#            - 3005:3005/tcp
+#            - 8324:8324/tcp
+#            - 1900:1900/udp
+#            - 32410:32410/udp
+#            - 32412:32412/udp
+#            - 32413:32413/udp
+#            - 32414:32414/udp
+#        env_file: uidgid.env
+#        environment:
+#            - TZ=Europe/London
+#            - VIRTUAL_HOST=plex.${HOSTNAME}
+#            - VIRTUAL_PORT=32400
+#            - ADVERTISE_IP=http://plex.${HOSTNAME}/
+#        hostname: PlexServer
+#        restart: always
 
     sonarr:
         image: linuxserver/sonarr:latest
@@ -153,7 +153,7 @@ services:
             - 8090:8090
         env_file: uidgid.env
         environment:
-            - VIRTUAL_HOST=mylar.HOSTNAME.com
+            - VIRTUAL_HOST=mylar.${HOSTNAME}
             - VIRTUAL_PORT=8090
         restart: always
 
@@ -171,7 +171,7 @@ services:
             - 2203:2203
         env_file: uidgid.env
         environment:
-            - VIRTUAL_HOST=ubooquity.HOSTNAME.com
+            - VIRTUAL_HOST=ubooquity.${HOSTNAME}
             - VIRTUAL_PORT=2202
         restart: always
 
