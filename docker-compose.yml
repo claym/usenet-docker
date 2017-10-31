@@ -14,8 +14,8 @@ services:
 #        container_name: sabnzbd
 #        volumes:
 #            - ${DATA}/config/sabnzbd:/config
-#            - ${DATA}/Downloads/complete:/downloads
-#            - ${DATA}/Downloads/incomplete:/incomplete-downloads
+#            - ${DATA}/download/complete:/download
+#            - ${DATA}/download/incomplete:/incomplete-download
 #        ports:
 #            - 8080:8080
 #        env_file: uidgid.env
@@ -30,8 +30,8 @@ services:
         container_name: nzbget
         volumes:
             - ${DATA}/config/nzbget:/config
-            - ${DATA}/Downloads/complete:/complete
-            - ${DATA}/Downloads:/downloads
+            - ${DATA}/download/complete:/complete
+            - ${DATA}/download:/download
         ports:
             - 6789:6789
         env_file: uidgid.env
@@ -45,7 +45,7 @@ services:
 #        container_name: couchpotato
 #        volumes:
 #            - ${DATA}/config/couchpotato:/config
-#            - ${DATA}/Downloads/complete:/downloads
+#            - ${DATA}/download/complete:/download
 #            - ${DATA}/Movies:/movies
 #        ports:
 #            - 5050:5050
@@ -60,8 +60,8 @@ services:
         container_name: radarr
         volumes:
             - ${DATA}/config/radarr:/config
-            - ${DATA}/Movies:/movies
-            - ${DATA}/Downloads/complete:/downloads
+            - ${DATA}/movies:/movies
+            - ${DATA}/download/complete:/download
             - /etc/localtime:/etc/localtime:ro
         ports:
             - 7878:7878
@@ -106,8 +106,8 @@ services:
         volumes:
             - ${DATA}/config/sonarr:/config
             - /etc/localtime:/etc/localtime:ro
-            - ${DATA}/TV:/tv
-            - ${DATA}/Downloads/complete:/downloads
+            - ${DATA}/tv:/tv
+            - ${DATA}/download/complete:/download
         ports:
             - 8989:8989
         env_file: uidgid.env
@@ -146,7 +146,7 @@ services:
         container_name: mylar
         volumes:
             - ${DATA}/config/mylar:/config
-            - ${DATA}/Downloads/complete:/downloads
+            - ${DATA}/download/complete:/download
             - ${DATA}/comics:/comics
             - /etc/localtime:/etc/localtime:ro
         ports:
@@ -164,7 +164,7 @@ services:
             - ${DATA}/config/ubooquity:/config
             - ${DATA}/books:/books
             - ${DATA}/comics:/comics
-            - ${DATA}/Downloads/complete:/downloads
+            - ${DATA}/download/complete:/download
             - /etc/localtime:/etc/localtime:ro
         ports:
             - 2202:2202
