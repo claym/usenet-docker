@@ -61,7 +61,7 @@ services:
         volumes:
             - ${DATA}/config/radarr:/config
             - ${DATA}/movies:/movies
-            - ${DATA}/download/complete:/download
+            - ${DATA}/download:/download
             - /etc/localtime:/etc/localtime:ro
         ports:
             - 7878:7878
@@ -107,7 +107,7 @@ services:
             - ${DATA}/config/sonarr:/config
             - /etc/localtime:/etc/localtime:ro
             - ${DATA}/tv:/tv
-            - ${DATA}/download/complete:/download
+            - ${DATA}/download:/download
         ports:
             - 8989:8989
         env_file: uidgid.env
@@ -146,7 +146,7 @@ services:
         container_name: mylar
         volumes:
             - ${DATA}/config/mylar:/config
-            - ${DATA}/download/complete:/download
+            - ${DATA}/download:/download
             - ${DATA}/comics:/comics
             - /etc/localtime:/etc/localtime:ro
         ports:
