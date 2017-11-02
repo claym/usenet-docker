@@ -14,8 +14,8 @@ services:
 #        container_name: sabnzbd
 #        volumes:
 #            - ${DATA}/config/sabnzbd:/config
-#            - ${DATA}/download/complete:/download
-#            - ${DATA}/download/incomplete:/incomplete-download
+#            - ${DOWNLOAD}/complete:/download
+#            - ${DOWNLOAD}/incomplete:/incomplete-download
 #        ports:
 #            - 8080:8080
 #        env_file: uidgid.env
@@ -30,8 +30,8 @@ services:
         container_name: nzbget
         volumes:
             - ${DATA}/config/nzbget:/config
-            - ${DATA}/download/complete:/complete
-            - ${DATA}/download:/download
+            - ${DATA}:/media
+            - ${DOWNLOAD}:/download
         ports:
             - 6789:6789
         env_file: uidgid.env
@@ -45,7 +45,7 @@ services:
 #        container_name: couchpotato
 #        volumes:
 #            - ${DATA}/config/couchpotato:/config
-#            - ${DATA}/download/complete:/download
+#            - ${DOWNLOAD}/complete:/download
 #            - ${DATA}/Movies:/movies
 #        ports:
 #            - 5050:5050
@@ -61,7 +61,7 @@ services:
         volumes:
             - ${DATA}/config/radarr:/config
             - ${DATA}/movies:/movies
-            - ${DATA}/download:/download
+            - ${DOWNLOAD}:/download
             - /etc/localtime:/etc/localtime:ro
         ports:
             - 7878:7878
@@ -107,7 +107,7 @@ services:
             - ${DATA}/config/sonarr:/config
             - /etc/localtime:/etc/localtime:ro
             - ${DATA}/tv:/tv
-            - ${DATA}/download:/download
+            - ${DOWNLOAD}:/download
         ports:
             - 8989:8989
         env_file: uidgid.env
@@ -146,7 +146,7 @@ services:
         container_name: mylar
         volumes:
             - ${DATA}/config/mylar:/config
-            - ${DATA}/download:/download
+            - ${DOWNLOAD}:/download
             - ${DATA}/comics:/comics
             - /etc/localtime:/etc/localtime:ro
         ports:
@@ -164,7 +164,7 @@ services:
             - ${DATA}/config/ubooquity:/config
             - ${DATA}/books:/books
             - ${DATA}/comics:/comics
-            - ${DATA}/download/complete:/download
+            - ${DOWNLOAD}/complete:/download
             - /etc/localtime:/etc/localtime:ro
         ports:
             - 2202:2202
@@ -180,7 +180,7 @@ services:
         container_name: nzbhydra
         volumes:
             - ${DATA}/config/nzbhydra:/config
-            - ${DATA}/download/complete:/download
+            - ${DOWNLOAD}/complete:/download
             - /etc/localtime:/etc/localtime:ro
         ports:
             - 5075:5075
@@ -188,5 +188,19 @@ services:
         environment:
             - VIRTUAL_HOST=mylar.${HOSTNAME}
             - VIRTUAL_PORT=5075
+        restart: always
+
+    plexpy:
+        image: linuxserver/plexpy:latest
+        container_name: plexpy
+        volumes:
+            - ${DATA}/config/plexpy:/config
+            - /etc/localtime:/etc/localtime:ro
+            - ${PLEXDATA}/Plex Media Server/Logs:/logs:ro
+        ports:
+            - 8181:8181
+        env_file: uidgid.env
+        environment:
+            - VIRTUAL_HOST=plexpy.${HOSTNAME}
         restart: always
 
