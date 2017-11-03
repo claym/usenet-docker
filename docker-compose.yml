@@ -31,6 +31,7 @@ services:
         volumes:
             - ${DATA}/config/nzbget:/config
             - ${DATA}:/media
+            - ${DATA}/comics:/comics
             - ${DOWNLOAD}:/download
         ports:
             - 6789:6789
