@@ -117,6 +117,23 @@ services:
             - VIRTUAL_PORT=8989
         restart: always
 
+    glances:
+        image: nicolargo/glances:latest
+        container_name: glances
+        volumes:
+            - ${DATA}/config/glances:/glances/conf
+            - /etc/localtime:/etc/localtime:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        ports:
+            - 61208-61209:61208-61209
+        env_file: uidgid.env
+        pid: "host"
+        environment:
+            - VIRTUAL_HOST=glances.${HOSTNAME}
+            - GLANCES_OPT=-w --disable-wifi
+        restart: always
+
+
     muximux:
         image: linuxserver/muximux:latest
         container_name: muximux
@@ -127,6 +144,18 @@ services:
         environment:
             - VIRTUAL_HOST=muximux.${HOSTNAME}
         restart: always
+
+#    organizr:
+#        image: lsiocommunity/organizr:latest
+#        container_name: organizr
+#        volumes:
+#            - ${DATA}/config/organizr:/config
+#            - /etc/localtime:/etc/localtime:ro
+#        env_file: uidgid.env
+#        environment:
+#            - VIRTUAL_HOST=organizr.${HOSTNAME}
+#        restart: always
+
 
     ombi:
         image: linuxserver/ombi:latest
