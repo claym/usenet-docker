@@ -7,7 +7,7 @@ services:
             - /var/run/docker.sock:/tmp/docker.sock:ro
         ports:
             - 80:80
-        restart: always
+        restart: unless-stopped
 
 #    sabnzbd:
 #        image: linuxserver/sabnzbd:latest
@@ -23,7 +23,7 @@ services:
 #            - EDGE=1
 #            - VIRTUAL_HOST=sabnzbd.${HOSTNAME}
 #            - VIRTUAL_PORT=8080
-#        restart: always
+#        restart: unless-stopped
 
     nzbget:
         image: linuxserver/nzbget:latest
@@ -39,7 +39,7 @@ services:
         environment:
             - VIRTUAL_HOST=nzbget.${HOSTNAME}
             - VIRTUAL_PORT=6789
-        restart: always
+        restart: unless-stopped
 
 #    couchpotato:
 #        image: linuxserver/couchpotato:latest
@@ -54,7 +54,7 @@ services:
 #        environment:
 #            - VIRTUAL_HOST=couchpotato.${HOSTNAME}
 #            - VIRTUAL_PORT=5050
-#        restart: always
+#        restart: unless-stopped
 
     radarr:
         image: linuxserver/radarr:latest
@@ -70,22 +70,22 @@ services:
         environment:
             - VIRTUAL_HOST=radarr.${HOSTNAME}
             - VIRTUAL_PORT=7878
-        restart: always
+        restart: unless-stopped
     
     plex:
-        image: plexinc/pms-docker:latest
+        image: plexinc/pms-docker:plexpass
         container_name: plex
         volumes:
+            - ${DATA}/config/plex:/backup
             - /opt/plex/config:/config
             - /opt/plex/appdata/plex/transcodes
             - ${DATA}/tv:/data/tvshows
             - ${DATA}/movies:/data/movies
         ports:
-            - 32469:32469
             - 32400:32400/tcp
-            - 32401:32401
             - 3005:3005/tcp
             - 8324:8324/tcp
+            - 32469:32469/tcp
             - 1900:1900/udp
             - 32410:32410/udp
             - 32412:32412/udp
@@ -94,12 +94,12 @@ services:
         env_file: uidgid.env
         environment:
             - TZ=America/New_York
-            - VIRTUAL_HOST=plex.${HOSTNAME}
+            - VIRTUAL_HOST=plex.pfd.net
             - VIRTUAL_PORT=32400
-            - ADVERTISE_IP=http://plex.pfd.net/
+            - ADVERTISE_IP=http://192.168.2.20/
             - PLEX_CLAIM=${PLEXCLAIM}
         hostname: plex.${HOSTNAME}
-        restart: always
+        restart: unless-stopped
 
     sonarr:
         image: linuxserver/sonarr:latest
@@ -115,7 +115,7 @@ services:
         environment:
             - VIRTUAL_HOST=sonarr.${HOSTNAME}
             - VIRTUAL_PORT=8989
-        restart: always
+        restart: unless-stopped
 
     glances:
         image: nicolargo/glances:latest
@@ -131,7 +131,7 @@ services:
         environment:
             - VIRTUAL_HOST=glances.${HOSTNAME}
             - GLANCES_OPT=-w --disable-wifi
-        restart: always
+        restart: unless-stopped
 
 
     muximux:
@@ -143,7 +143,7 @@ services:
         env_file: uidgid.env
         environment:
             - VIRTUAL_HOST=muximux.${HOSTNAME}
-        restart: always
+        restart: unless-stopped
 
 #    organizr:
 #        image: lsiocommunity/organizr:latest
@@ -154,7 +154,7 @@ services:
 #        env_file: uidgid.env
 #        environment:
 #            - VIRTUAL_HOST=organizr.${HOSTNAME}
-#        restart: always
+#        restart: unless-stopped
 
 
     ombi:
@@ -169,7 +169,7 @@ services:
         environment:
             - VIRTUAL_HOST=ombi.${HOSTNAME}
             - VIRTUAL_PORT=3579
-        restart: always
+        restart: unless-stopped
 
     mylar:
         image: linuxserver/mylar:latest
@@ -185,7 +185,7 @@ services:
         environment:
             - VIRTUAL_HOST=mylar.${HOSTNAME}
             - VIRTUAL_PORT=8090
-        restart: always
+        restart: unless-stopped
 
     ubooquity:
         image: linuxserver/ubooquity:latest
@@ -203,7 +203,7 @@ services:
         environment:
             - VIRTUAL_HOST=ubooquity.${HOSTNAME}
             - VIRTUAL_PORT=2202
-        restart: always
+        restart: unless-stopped
 
     nzbhydra:
         image: linuxserver/hydra:latest
@@ -218,7 +218,7 @@ services:
         environment:
             - VIRTUAL_HOST=mylar.${HOSTNAME}
             - VIRTUAL_PORT=5075
-        restart: always
+        restart: unless-stopped
 
     plexpy:
         image: linuxserver/plexpy:latest
@@ -232,5 +232,5 @@ services:
         env_file: uidgid.env
         environment:
             - VIRTUAL_HOST=plexpy.${HOSTNAME}
-        restart: always
+        restart: unless-stopped
 
