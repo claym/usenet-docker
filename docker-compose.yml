@@ -30,9 +30,9 @@ services:
         container_name: nzbget
         volumes:
             - ${DATA}/config/nzbget:/config
-            - ${DATA}:/media
             - ${DATA}/comics:/comics
             - ${DOWNLOAD}:/download
+            - /opt/nzbget:/main
         ports:
             - 6789:6789
         env_file: uidgid.env
@@ -72,34 +72,34 @@ services:
             - VIRTUAL_PORT=7878
         restart: always
     
-#    plex:
-#        image: plexinc/pms-docker:latest
-#        container_name: plex
-#        volumes:
-#            - ${DATA}/config/plex:/config
-#            - ${DATA}/appdata/plex/transcodes
-#            - ${DATA}/TV:/data/tvshows
-#            - ${DATA}/Movies:/data/movies
-#            - ${DATA}/Anime:/data/anime
-#        ports:
-#            - 32469:32469
-#            - 32400:32400/tcp
-#            - 32401:32401
-#            - 3005:3005/tcp
-#            - 8324:8324/tcp
-#            - 1900:1900/udp
-#            - 32410:32410/udp
-#            - 32412:32412/udp
-#            - 32413:32413/udp
-#            - 32414:32414/udp
-#        env_file: uidgid.env
-#        environment:
-#            - TZ=Europe/London
-#            - VIRTUAL_HOST=plex.${HOSTNAME}
-#            - VIRTUAL_PORT=32400
-#            - ADVERTISE_IP=http://plex.${HOSTNAME}/
-#        hostname: PlexServer
-#        restart: always
+    plex:
+        image: plexinc/pms-docker:latest
+        container_name: plex
+        volumes:
+            - /opt/plex/config:/config
+            - /opt/plex/appdata/plex/transcodes
+            - ${DATA}/tv:/data/tvshows
+            - ${DATA}/movies:/data/movies
+        ports:
+            - 32469:32469
+            - 32400:32400/tcp
+            - 32401:32401
+            - 3005:3005/tcp
+            - 8324:8324/tcp
+            - 1900:1900/udp
+            - 32410:32410/udp
+            - 32412:32412/udp
+            - 32413:32413/udp
+            - 32414:32414/udp
+        env_file: uidgid.env
+        environment:
+            - TZ=America/New_York
+            - VIRTUAL_HOST=plex.${HOSTNAME}
+            - VIRTUAL_PORT=32400
+            - ADVERTISE_IP=http://plex.pfd.net/
+            - PLEX_CLAIM=${PLEXCLAIM}
+        hostname: plex.${HOSTNAME}
+        restart: always
 
     sonarr:
         image: linuxserver/sonarr:latest
