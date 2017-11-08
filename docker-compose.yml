@@ -1,236 +1,240 @@
-version: '2'
+version: "3.1"
+
 services:
-    nginx-proxy:
-        image: jwilder/nginx-proxy:latest
-        container_name: nginx-proxy
-        volumes:
-            - /var/run/docker.sock:/tmp/docker.sock:ro
-        ports:
-            - 80:80
-        restart: unless-stopped
 
-#    sabnzbd:
-#        image: linuxserver/sabnzbd:latest
-#        container_name: sabnzbd
-#        volumes:
-#            - ${DATA}/config/sabnzbd:/config
-#            - ${DOWNLOAD}/complete:/download
-#            - ${DOWNLOAD}/incomplete:/incomplete-download
-#        ports:
-#            - 8080:8080
-#        env_file: uidgid.env
-#        environment:
-#            - EDGE=1
-#            - VIRTUAL_HOST=sabnzbd.${HOSTNAME}
-#            - VIRTUAL_PORT=8080
-#        restart: unless-stopped
+  watchtower:
+    image: v2tec/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --interval 3600 --cleanup --debug
 
-    nzbget:
-        image: linuxserver/nzbget:latest
-        container_name: nzbget
-        volumes:
-            - ${DATA}/config/nzbget:/config
-            - ${DATA}/comics:/comics
-            - ${DOWNLOAD}:/download
-            - /opt/nzbget:/main
-        ports:
-            - 6789:6789
-        env_file: uidgid.env
-        environment:
-            - VIRTUAL_HOST=nzbget.${HOSTNAME}
-            - VIRTUAL_PORT=6789
-        restart: unless-stopped
+  nginx-proxy:
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    image: jwilder/nginx-proxy:latest
+    container_name: nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+      - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+      - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:ro
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      DEFAULT_HOST: muximux.pfd.net
+    restart: unless-stopped
 
-#    couchpotato:
-#        image: linuxserver/couchpotato:latest
-#        container_name: couchpotato
-#        volumes:
-#            - ${DATA}/config/couchpotato:/config
-#            - ${DOWNLOAD}/complete:/download
-#            - ${DATA}/Movies:/movies
-#        ports:
-#            - 5050:5050
-#        env_file: uidgid.env
-#        environment:
-#            - VIRTUAL_HOST=couchpotato.${HOSTNAME}
-#            - VIRTUAL_PORT=5050
-#        restart: unless-stopped
+  nginx-proxy-ssl:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx-proxy-ssl
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+      - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+      - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:rw
+    environment: 
+      - DEBUG=false
+    depends_on:
+      - nginx-proxy
+    restart: unless-stopped
 
-    radarr:
-        image: linuxserver/radarr:latest
-        container_name: radarr
-        volumes:
-            - ${DATA}/config/radarr:/config
-            - ${DATA}/movies:/movies
-            - ${DOWNLOAD}:/download
-            - /etc/localtime:/etc/localtime:ro
-        ports:
-            - 7878:7878
-        env_file: uidgid.env
-        environment:
-            - VIRTUAL_HOST=radarr.${HOSTNAME}
-            - VIRTUAL_PORT=7878
-        restart: unless-stopped
-    
-    plex:
-        image: plexinc/pms-docker:plexpass
-        container_name: plex
-        volumes:
-            - ${DATA}/config/plex:/backup
-            - /opt/plex/config:/config
-            - /opt/plex/appdata/plex/transcodes
-            - ${DATA}/tv:/data/tvshows
-            - ${DATA}/movies:/data/movies
-        ports:
-            - 32400:32400/tcp
-            - 3005:3005/tcp
-            - 8324:8324/tcp
-            - 32469:32469/tcp
-            - 1900:1900/udp
-            - 32410:32410/udp
-            - 32412:32412/udp
-            - 32413:32413/udp
-            - 32414:32414/udp
-        env_file: uidgid.env
-        environment:
-            - TZ=America/New_York
-            - VIRTUAL_HOST=plex.pfd.net
-            - VIRTUAL_PORT=32400
-            - ADVERTISE_IP=http://192.168.2.20/
-            - PLEX_CLAIM=${PLEXCLAIM}
-        hostname: plex.${HOSTNAME}
-        restart: unless-stopped
+  plex:
+    image: plexinc/pms-docker:plexpass
+    container_name: plex
+    volumes:
+      - ${DATA}/config/plex:/backup
+      - /opt/plex/config:/config
+      - /opt/plex/appdata/plex/transcodes:/transcode
+      - ${DATA}/tv:/data/tvshows
+      - ${DATA}/movies:/data/movies
+    ports:
+      - 32400:32400/tcp
+      - 3005:3005/tcp
+      - 8324:8324/tcp
+      - 32469:32469/tcp
+      - 1900:1900/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+    environment:
+      - PLEX_UID=${PUID}
+      - PLEX_GID=${PGID}
+      - TZ=America/New_York
+      - VIRTUAL_HOST=plex.pfd.net
+      - VIRTUAL_PORT=32400
+      - LETSENCRYPT_HOST=plex.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
+      - ADVERTISE_IP=https://plex.pfd.net/
+      - PLEX_CLAIM=${PLEXCLAIM}
+    hostname: plex.${HOSTNAME}
+    restart: unless-stopped
 
-    sonarr:
-        image: linuxserver/sonarr:latest
-        container_name: sonarr
-        volumes:
-            - ${DATA}/config/sonarr:/config
-            - /etc/localtime:/etc/localtime:ro
-            - ${DATA}/tv:/tv
-            - ${DOWNLOAD}:/download
-        ports:
-            - 8989:8989
-        env_file: uidgid.env
-        environment:
-            - VIRTUAL_HOST=sonarr.${HOSTNAME}
-            - VIRTUAL_PORT=8989
-        restart: unless-stopped
+  plexpy:
+    image: linuxserver/plexpy:latest
+    container_name: plexpy
+    volumes:
+      - ${DATA}/config/plexpy:/config
+      - /etc/localtime:/etc/localtime:ro
+      - ${PLEXDATA}/Plex Media Server/Logs:/logs:ro
+    ports:
+      - 8181:8181
+    environment:
+      - VIRTUAL_HOST=plexpy.${HOSTNAME}
+    depends_on:
+      - plex
+    restart: unless-stopped
 
-    glances:
-        image: nicolargo/glances:latest
-        container_name: glances
-        volumes:
-            - ${DATA}/config/glances:/glances/conf
-            - /etc/localtime:/etc/localtime:ro
-            - /var/run/docker.sock:/var/run/docker.sock:ro
-        ports:
-            - 61208-61209:61208-61209
-        env_file: uidgid.env
-        pid: "host"
-        environment:
-            - VIRTUAL_HOST=glances.${HOSTNAME}
-            - GLANCES_OPT=-w --disable-wifi
-        restart: unless-stopped
+  nzbget:
+    image: linuxserver/nzbget:latest
+    container_name: nzbget
+    volumes:
+      - ${DATA}/config/nzbget:/config
+      - ${DATA}/comics:/comics
+      - ${DOWNLOAD}:/download
+      - /opt/nzbget:/main
+    ports:
+      - 6789:6789
+    environment:
+      - VIRTUAL_HOST=nzbget.${HOSTNAME}
+      - VIRTUAL_PORT=6789
+    restart: unless-stopped
 
+  nzbhydra:
+    image: linuxserver/hydra:latest
+    container_name: nzbhydra
+    volumes:
+      - ${DATA}/config/nzbhydra:/config
+      - ${DOWNLOAD}/complete:/download
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 5075:5075
+    environment:
+      - VIRTUAL_HOST=mylar.${HOSTNAME}
+      - VIRTUAL_PORT=5075
+    depends_on:
+      - nzbget
+    restart: unless-stopped
 
-    muximux:
-        image: linuxserver/muximux:latest
-        container_name: muximux
-        volumes:
-            - ${DATA}/config/muximux:/config
-            - /etc/localtime:/etc/localtime:ro
-        env_file: uidgid.env
-        environment:
-            - VIRTUAL_HOST=muximux.${HOSTNAME}
-        restart: unless-stopped
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    volumes:
+      - ${DATA}/config/sonarr:/config
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/tv:/tv
+      - ${DOWNLOAD}:/download
+    ports:
+      - 8989:8989
+    environment:
+      - VIRTUAL_HOST=sonarr.${HOSTNAME}
+      - VIRTUAL_PORT=8989
+    depends_on:
+      - nzbget
+      - nzbhydra
+    restart: unless-stopped
 
-#    organizr:
-#        image: lsiocommunity/organizr:latest
-#        container_name: organizr
-#        volumes:
-#            - ${DATA}/config/organizr:/config
-#            - /etc/localtime:/etc/localtime:ro
-#        env_file: uidgid.env
-#        environment:
-#            - VIRTUAL_HOST=organizr.${HOSTNAME}
-#        restart: unless-stopped
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    volumes:
+      - ${DATA}/config/radarr:/config
+      - ${DATA}/movies:/movies
+      - ${DOWNLOAD}:/download
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 7878:7878
+    environment:
+      - VIRTUAL_HOST=radarr.${HOSTNAME}
+      - VIRTUAL_PORT=7878
+    depends_on:
+      - nzbget
+      - nzbhydra
+    restart: unless-stopped
 
+  mylar:
+    image: linuxserver/mylar:latest
+    container_name: mylar
+    volumes:
+      - ${DATA}/config/mylar:/config
+      - ${DOWNLOAD}:/download
+      - ${DATA}/comics:/comics
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 8090:8090
+    environment:
+      - VIRTUAL_HOST=mylar.${HOSTNAME}
+      - VIRTUAL_PORT=8090
+    depends_on:
+      - nzbget
+      - nzbhydra
+    restart: unless-stopped
 
-    ombi:
-        image: linuxserver/ombi:latest
-        container_name: ombi
-        volumes:
-            - ${DATA}/config/ombi:/config
-            - /etc/localtime:/etc/localtime:ro
-        ports:
-            - 3579:3579
-        env_file: uidgid.env
-        environment:
-            - VIRTUAL_HOST=ombi.${HOSTNAME}
-            - VIRTUAL_PORT=3579
-        restart: unless-stopped
+  ubooquity:
+    image: linuxserver/ubooquity:latest
+    container_name: ubooquity
+    volumes:
+      - ${DATA}/config/ubooquity:/config
+      - ${DATA}/books:/books
+      - ${DATA}/comics:/comics
+      - ${DOWNLOAD}/complete:/download
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 2202:2202
+      - 2203:2203
+    environment:
+      - VIRTUAL_HOST=ubooquity.${HOSTNAME}
+      - VIRTUAL_PORT=2202
+      - LETSENCRYPT_HOST=ubooquity.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=${EMAIL}
+    restart: unless-stopped
 
-    mylar:
-        image: linuxserver/mylar:latest
-        container_name: mylar
-        volumes:
-            - ${DATA}/config/mylar:/config
-            - ${DOWNLOAD}:/download
-            - ${DATA}/comics:/comics
-            - /etc/localtime:/etc/localtime:ro
-        ports:
-            - 8090:8090
-        env_file: uidgid.env
-        environment:
-            - VIRTUAL_HOST=mylar.${HOSTNAME}
-            - VIRTUAL_PORT=8090
-        restart: unless-stopped
+  glances:
+    image: nicolargo/glances:latest
+    container_name: glances
+    volumes:
+      - ${DATA}/config/glances:/glances/conf
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 61208-61209:61208-61209
+    pid: "host"
+    environment:
+      VIRTUAL_HOST: glances.${HOSTNAME}
+      VIRTUAL_PORT: 61208
+      GLANCES_OPT: -w --disable-wifi
+      LETSENCRYPT_HOST: glances.${HOSTNAME}
+      LETSENCRYPT_EMAIL: ${EMAIL}
+    restart: unless-stopped
 
-    ubooquity:
-        image: linuxserver/ubooquity:latest
-        container_name: ubooquity
-        volumes:
-            - ${DATA}/config/ubooquity:/config
-            - ${DATA}/books:/books
-            - ${DATA}/comics:/comics
-            - ${DOWNLOAD}/complete:/download
-            - /etc/localtime:/etc/localtime:ro
-        ports:
-            - 2202:2202
-            - 2203:2203
-        env_file: uidgid.env
-        environment:
-            - VIRTUAL_HOST=ubooquity.${HOSTNAME}
-            - VIRTUAL_PORT=2202
-        restart: unless-stopped
+  muximux:
+    image: linuxserver/muximux:latest
+    container_name: muximux
+    volumes:
+      - ${DATA}/config/muximux:/config
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - VIRTUAL_HOST=muximux.${HOSTNAME},home.${HOSTNAME}
+      - VIRTUAL_PORT=80
+      - LETSENCRYPT_HOST=muximux.${HOSTNAME},home.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=${EMAIL}
+    restart: unless-stopped
 
-    nzbhydra:
-        image: linuxserver/hydra:latest
-        container_name: nzbhydra
-        volumes:
-            - ${DATA}/config/nzbhydra:/config
-            - ${DOWNLOAD}/complete:/download
-            - /etc/localtime:/etc/localtime:ro
-        ports:
-            - 5075:5075
-        env_file: uidgid.env
-        environment:
-            - VIRTUAL_HOST=mylar.${HOSTNAME}
-            - VIRTUAL_PORT=5075
-        restart: unless-stopped
-
-    plexpy:
-        image: linuxserver/plexpy:latest
-        container_name: plexpy
-        volumes:
-            - ${DATA}/config/plexpy:/config
-            - /etc/localtime:/etc/localtime:ro
-            - ${PLEXDATA}/Plex Media Server/Logs:/logs:ro
-        ports:
-            - 8181:8181
-        env_file: uidgid.env
-        environment:
-            - VIRTUAL_HOST=plexpy.${HOSTNAME}
-        restart: unless-stopped
+  ombi:
+    image: linuxserver/ombi:latest
+    container_name: ombi
+    volumes:
+      - ${DATA}/config/ombi:/config
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 3579:3579
+    environment:
+      - VIRTUAL_HOST=ombi.${HOSTNAME}
+      - VIRTUAL_PORT=3579
+      - LETSENCRYPT_HOST=ombi.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
+    restart: unless-stopped
 
