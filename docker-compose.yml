@@ -88,6 +88,23 @@ services:
       - plex
     restart: unless-stopped
 
+  transmission:
+    image: linuxserver/transmission:latest
+    container_name: transmission
+    volumes:
+      - ${DATA}/config/transmission:/config
+      - ${DOWNLOAD}:/download
+      - /opt/transmission:/main
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    environment:
+      - VIRTUAL_HOST=transmission.${HOSTNAME}
+      - VIRTUAL_PORT=6789
+    restart: unless-stopped
+
+
   nzbget:
     image: linuxserver/nzbget:latest
     container_name: nzbget
