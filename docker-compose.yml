@@ -93,7 +93,7 @@ services:
     container_name: transmission
     volumes:
       - ${DATA}/config/transmission:/config
-      - ${DOWNLOAD}:/download
+      - ${DOWNLOAD}:/downloads
       - /opt/transmission:/main
     ports:
       - 9091:9091
@@ -110,8 +110,7 @@ services:
     container_name: nzbget
     volumes:
       - ${DATA}/config/nzbget:/config
-      - ${DATA}/comics:/comics
-      - ${DOWNLOAD}:/download
+      - ${DOWNLOAD}:/downloads
       - /opt/nzbget:/main
     ports:
       - 6789:6789
@@ -125,7 +124,7 @@ services:
     container_name: nzbhydra
     volumes:
       - ${DATA}/config/nzbhydra:/config
-      - ${DOWNLOAD}/complete:/download
+      - ${DOWNLOAD}/complete:/downloads
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 5075:5075
@@ -143,7 +142,7 @@ services:
       - ${DATA}/config/sonarr:/config
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/tv:/tv
-      - ${DOWNLOAD}:/download
+      - ${DOWNLOAD}:/downloads
     ports:
       - 8989:8989
     environment:
@@ -160,7 +159,7 @@ services:
     volumes:
       - ${DATA}/config/radarr:/config
       - ${DATA}/movies:/movies
-      - ${DOWNLOAD}:/download
+      - ${DOWNLOAD}:/downloads
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 7878:7878
@@ -177,7 +176,7 @@ services:
     container_name: mylar
     volumes:
       - ${DATA}/config/mylar:/config
-      - ${DOWNLOAD}:/download
+      - ${DOWNLOAD}:/downloads
       - ${DATA}/comics:/comics
       - /etc/localtime:/etc/localtime:ro
     ports:
@@ -197,7 +196,7 @@ services:
       - ${DATA}/config/ubooquity:/config
       - ${DATA}/books:/books
       - ${DATA}/comics:/comics
-      - ${DOWNLOAD}/complete:/download
+      - ${DOWNLOAD}/complete:/downloads
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 2202:2202
