@@ -60,9 +60,9 @@ services:
       - 32412:32412/udp
       - 32413:32413/udp
       - 32414:32414/udp
+    env_file: uidgid.env
     environment:
-      - PLEX_UID=${PUID}
-      - PLEX_GID=${PGID}
+      - LD_LIBRARY_PATH=/usr/lib/plexmediaserver
       - TZ=America/New_York
       - VIRTUAL_HOST=plex.pfd.net
       - VIRTUAL_PORT=32400
@@ -82,10 +82,10 @@ services:
       - ${PLEXDATA}/Plex Media Server/Logs:/logs:ro
     ports:
       - 8181:8181
+    env_file: uidgid.env
     environment:
       - VIRTUAL_HOST=plexpy.${HOSTNAME}
-      - PGID=${PGID}
-      - PUID=${PUID}
+      - VIRTUAL_PORT=8181
     depends_on:
       - plex
     restart: unless-stopped
@@ -101,11 +101,10 @@ services:
       - 9091:9091
       - 51413:51413
       - 51413:51413/udp
+    env_file: uidgid.env
     environment:
       - VIRTUAL_HOST=transmission.${HOSTNAME}
       - VIRTUAL_PORT=6789
-      - PGID=${PGID}
-      - PUID=${PUID}
     restart: unless-stopped
 
 
@@ -118,11 +117,10 @@ services:
       - /opt/nzbget:/main
     ports:
       - 6789:6789
+    env_file: uidgid.env
     environment:
-      - VIRTUAL_HOST=nzbget.${HOSTNAME}
-      - VIRTUAL_PORT=6789
-      - PGID=${PGID}
-      - PUID=${PUID}
+     - VIRTUAL_HOST=nzbget.${HOSTNAME}
+     - VIRTUAL_PORT=6789
     restart: unless-stopped
 
   nzbhydra:
@@ -134,11 +132,10 @@ services:
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 5075:5075
+    env_file: uidgid.env
     environment:
       - VIRTUAL_HOST=mylar.${HOSTNAME}
       - VIRTUAL_PORT=5075
-      - PGID=${PGID}
-      - PUID=${PUID}
     depends_on:
       - nzbget
     restart: unless-stopped
@@ -153,11 +150,10 @@ services:
       - ${DOWNLOAD}:/downloads
     ports:
       - 8989:8989
+    env_file: uidgid.env
     environment:
       - VIRTUAL_HOST=sonarr.${HOSTNAME}
       - VIRTUAL_PORT=8989
-      - PGID=${PGID}
-      - PUID=${PUID}
     depends_on:
       - nzbget
       - nzbhydra
@@ -173,11 +169,10 @@ services:
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 7878:7878
+    env_file: uidgid.env
     environment:
       - VIRTUAL_HOST=radarr.${HOSTNAME}
       - VIRTUAL_PORT=7878
-      - PGID=${PGID}
-      - PUID=${PUID}
     depends_on:
       - nzbget
       - nzbhydra
@@ -193,11 +188,10 @@ services:
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 8090:8090
+    env_file: uidgid.env
     environment:
       - VIRTUAL_HOST=mylar.${HOSTNAME}
       - VIRTUAL_PORT=8090
-      - PGID=${PGID}
-      - PUID=${PUID}
     depends_on:
       - nzbget
       - nzbhydra
@@ -215,13 +209,12 @@ services:
     ports:
       - 2202:2202
       - 2203:2203
+    env_file: uidgid.env
     environment:
       - VIRTUAL_HOST=ubooquity.${HOSTNAME}
       - VIRTUAL_PORT=2202
       - LETSENCRYPT_HOST=ubooquity.${HOSTNAME}
       - LETSENCRYPT_EMAIL=${EMAIL}
-      - PGID=${PGID}
-      - PUID=${PUID}
     restart: unless-stopped
 
   glances:
@@ -234,14 +227,13 @@ services:
     ports:
       - 61208-61209:61208-61209
     pid: "host"
+    env_file: uidgid.env
     environment:
       VIRTUAL_HOST: glances.${HOSTNAME}
       VIRTUAL_PORT: 61208
       GLANCES_OPT: -w --disable-wifi
       LETSENCRYPT_HOST: glances.${HOSTNAME}
       LETSENCRYPT_EMAIL: ${EMAIL}
-      PGID: ${PGID}
-      PUID: ${PUID}
     restart: unless-stopped
 
 #  muximux:
@@ -250,6 +242,7 @@ services:
 #    volumes:
 #      - ${DATA}/config/muximux:/config
 #      - /etc/localtime:/etc/localtime:ro
+#    env_file: uidgid.env
 #    environment:
 #      - VIRTUAL_HOST=muximux.${HOSTNAME},home.${HOSTNAME}
 #      - VIRTUAL_PORT=80
@@ -263,13 +256,12 @@ services:
     volumes:
       - ${DATA}/config/organizr:/config
       - /etc/localtime:/etc/localtime:ro
+    env_file: uidgid.env
     environment:
       - VIRTUAL_HOST=organizr.${HOSTNAME},home.${HOSTNAME}
       - VIRTUAL_PORT=80
       - LETSENCRYPT_HOST=organizr.${HOSTNAME},home.${HOSTNAME}
       - LETSENCRYPT_EMAIL=${EMAIL}
-      - PGID=${PGID}
-      - PUID=${PUID}
     restart: unless-stopped
 
 
@@ -281,12 +273,11 @@ services:
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 3579:3579
+    env_file: uidgid.env
     environment:
       - VIRTUAL_HOST=ombi.${HOSTNAME}
       - VIRTUAL_PORT=3579
       - LETSENCRYPT_HOST=ombi.${HOSTNAME}
       - LETSENCRYPT_EMAIL=clay@pfd.net
-      - PGID=${PGID}
-      - PUID=${PUID}
     restart: unless-stopped
 
