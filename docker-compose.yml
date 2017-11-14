@@ -10,6 +10,15 @@ services:
       - /root/.docker/config.json:/config.json
     command: --interval 3600 --cleanup --debug
 
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/portainer:/data
+    ports:
+      - 9000:9000
+
   nginx-proxy:
     labels:
       com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
@@ -192,6 +201,25 @@ services:
     environment:
       - VIRTUAL_HOST=mylar.${HOSTNAME}
       - VIRTUAL_PORT=8090
+    depends_on:
+      - nzbget
+      - nzbhydra
+    restart: unless-stopped
+
+  librarian:
+    image: linuxserver/lazylibrarian:latest
+    container_name: librarian
+    volumes:
+      - ${DATA}/config/librarian:/config
+      - ${DOWNLOAD}:/downloads
+      - ${DATA}/books:/books
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 5299:5299
+    env_file: uidgid.env
+    environment:
+      - VIRTUAL_HOST=librarian.${HOSTNAME}
+      - VIRTUAL_PORT=5299
     depends_on:
       - nzbget
       - nzbhydra
