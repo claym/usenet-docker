@@ -21,7 +21,7 @@ services:
 
   nginx-proxy:
     labels:
-      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy": "true"
     image: jwilder/nginx-proxy:latest
     container_name: nginx-proxy
     volumes:
@@ -46,6 +46,7 @@ services:
       - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:rw
     environment: 
       - DEBUG=false
+#      - ACME_CA_URI=https://acme-staging.api.letsencrypt.org/directory
     depends_on:
       - nginx-proxy
     restart: unless-stopped
@@ -73,7 +74,7 @@ services:
     environment:
       - LD_LIBRARY_PATH=/usr/lib/plexmediaserver
       - TZ=America/New_York
-      - VIRTUAL_HOST=plex.pfd.net
+      - VIRTUAL_HOST=plex.${HOSTNAME}
       - VIRTUAL_PORT=32400
       - LETSENCRYPT_HOST=plex.${HOSTNAME}
       - LETSENCRYPT_EMAIL=clay@pfd.net
@@ -95,6 +96,8 @@ services:
     environment:
       - VIRTUAL_HOST=plexpy.${HOSTNAME}
       - VIRTUAL_PORT=8181
+      - LETSENCRYPT_HOST=plexpy.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
     depends_on:
       - plex
     restart: unless-stopped
@@ -112,6 +115,8 @@ services:
       - 51413:51413/udp
     env_file: uidgid.env
     environment:
+      - LETSENCRYPT_HOST=transmission.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
       - VIRTUAL_HOST=transmission.${HOSTNAME}
       - VIRTUAL_PORT=6789
     restart: unless-stopped
@@ -126,6 +131,22 @@ services:
       - /opt/nzbget:/main
     ports:
       - 6789:6789
+    env_file: uidgid.env
+    environment:
+      - VIRTUAL_HOST=nzbget.${HOSTNAME}
+      - VIRTUAL_PORT=6789
+      - LETSENCRYPT_HOST=nzbget.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
+    restart: unless-stopped
+
+  jackett:
+    image: linuxserver/jackett
+    container_name: jackett
+    volumes:
+      - ${DATA}/config/jackett:/config
+      - ${DOWNLOAD}:/downloads
+    ports:
+      - 9117:9117
     env_file: uidgid.env
     environment:
      - VIRTUAL_HOST=nzbget.${HOSTNAME}
@@ -145,6 +166,8 @@ services:
     environment:
       - VIRTUAL_HOST=mylar.${HOSTNAME}
       - VIRTUAL_PORT=5075
+      - LETSENCRYPT_HOST=nzbhydra.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
     depends_on:
       - nzbget
     restart: unless-stopped
@@ -163,6 +186,8 @@ services:
     environment:
       - VIRTUAL_HOST=sonarr.${HOSTNAME}
       - VIRTUAL_PORT=8989
+      - LETSENCRYPT_HOST=sonarr.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
     depends_on:
       - nzbget
       - nzbhydra
@@ -182,6 +207,8 @@ services:
     environment:
       - VIRTUAL_HOST=radarr.${HOSTNAME}
       - VIRTUAL_PORT=7878
+      - LETSENCRYPT_HOST=radarr.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
     depends_on:
       - nzbget
       - nzbhydra
@@ -201,6 +228,8 @@ services:
     environment:
       - VIRTUAL_HOST=mylar.${HOSTNAME}
       - VIRTUAL_PORT=8090
+      - LETSENCRYPT_HOST=mylar.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
     depends_on:
       - nzbget
       - nzbhydra
@@ -220,6 +249,8 @@ services:
     environment:
       - VIRTUAL_HOST=librarian.${HOSTNAME}
       - VIRTUAL_PORT=5299
+      - LETSENCRYPT_HOST=librarian.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
     depends_on:
       - nzbget
       - nzbhydra
