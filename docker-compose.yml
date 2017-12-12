@@ -1,5 +1,10 @@
 version: "3.1"
 
+#volumes:
+#  vhost:
+#  html:
+#  certs:
+
 services:
 
   watchtower:
@@ -7,8 +12,15 @@ services:
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /root/.docker/config.json:/config.json
+      - /${DOCKER_USER}/.docker/config.json:/config.json
     command: --interval 3600 --cleanup --debug
+    environment:
+      - WATCHTOWER_NOTIFICATIONS=email
+      - WATCHTOWER_NOTIFICATION_EMAIL_FROM=${EMAIL_FROM}
+      - WATCHTOWER_NOTIFICATION_EMAIL_TO=${EMAIL}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=${EMAIL_SMTP}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=${EMAIL_LOGIN}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=${EMAIL_PASSWORD}
 
   portainer:
     image: portainer/portainer
@@ -18,35 +30,50 @@ services:
       - /opt/portainer:/data
     ports:
       - 9000:9000
+    environment:
+      - LETSENCRYPT_HOST=portainer.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
+      - VIRTUAL_HOST=portainer.${HOSTNAME}
+      - VIRTUAL_PORT=9000
+
 
   nginx-proxy:
     labels:
-      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy": "true"
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     image: jwilder/nginx-proxy:latest
     container_name: nginx-proxy
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
+#      - "vhost:/etc/nginx/vhost.d"
+#      - "html:/usr/share/nginx/html"
+#      - "certs:/etc/nginx/certs"
       - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
       - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
       - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:ro
+      - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
+      - ${NGINX_FILES_PATH}/dhparam:/etc/nginx/dhparam:ro
     ports:
       - 80:80
       - 443:443
     environment:
-      DEFAULT_HOST: muximux.pfd.net
+      DEFAULT_HOST: organizr.pfd.net
     restart: unless-stopped
 
   nginx-proxy-ssl:
-    image: jrcs/letsencrypt-nginx-proxy-companion
+    image: jrcs/letsencrypt-nginx-proxy-companion:stable
     container_name: nginx-proxy-ssl
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+#      - "vhost:/etc/nginx/vhost.d"
+#      - "html:/usr/share/nginx/html"
+#      - "certs:/etc/nginx/certs"
       - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
       - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
       - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:rw
     environment: 
-      - DEBUG=false
+#      - DEBUG=true
 #      - ACME_CA_URI=https://acme-staging.api.letsencrypt.org/directory
+      - ACME_TOS_HASH=cc88d8d9517f490191401e7b54e9ffd12a2b9082ec7a1d4cec6101f9f1647e7b
     depends_on:
       - nginx-proxy
     restart: unless-stopped
@@ -109,6 +136,7 @@ services:
       - ${DATA}/config/transmission:/config
       - ${DOWNLOAD}:/downloads
       - /opt/transmission:/main
+      - ${DOWNLOAD}/transmission/watch:/watch
     ports:
       - 9091:9091
       - 51413:51413
@@ -149,7 +177,7 @@ services:
       - 9117:9117
     env_file: uidgid.env
     environment:
-     - VIRTUAL_HOST=nzbget.${HOSTNAME}
+     - VIRTUAL_HOST=jackett.${HOSTNAME}
      - VIRTUAL_PORT=6789
     restart: unless-stopped
 
@@ -164,7 +192,7 @@ services:
       - 5075:5075
     env_file: uidgid.env
     environment:
-      - VIRTUAL_HOST=mylar.${HOSTNAME}
+      - VIRTUAL_HOST=nzbhydra.${HOSTNAME}
       - VIRTUAL_PORT=5075
       - LETSENCRYPT_HOST=nzbhydra.${HOSTNAME}
       - LETSENCRYPT_EMAIL=clay@pfd.net
@@ -215,7 +243,7 @@ services:
     restart: unless-stopped
 
   mylar:
-    image: linuxserver/mylar:latest
+    image: claymitchell/mylar:latest
     container_name: mylar
     volumes:
       - ${DATA}/config/mylar:/config
@@ -263,7 +291,7 @@ services:
       - ${DATA}/config/ubooquity:/config
       - ${DATA}/books:/books
       - ${DATA}/comics:/comics
-      - ${DOWNLOAD}/complete:/downloads
+      - ${DATA}:/files
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 2202:2202
