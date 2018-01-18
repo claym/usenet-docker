@@ -192,23 +192,24 @@ services:
     restart: unless-stopped
 
   nzbhydra:
-    image: linuxserver/hydra:latest
+    image: linuxserver/hydra2:latest
     container_name: nzbhydra
     volumes:
-      - ${DATA}/config/nzbhydra:/config
+      - ${DATA}/config/nzbhydra2:/config
       - ${DOWNLOAD}/complete:/downloads
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - 5075:5075
+      - 5076:5076
     env_file: uidgid.env
     environment:
       - VIRTUAL_HOST=nzbhydra.${HOSTNAME}
-      - VIRTUAL_PORT=5075
+      - VIRTUAL_PORT=5076
       - LETSENCRYPT_HOST=nzbhydra.${HOSTNAME}
       - LETSENCRYPT_EMAIL=clay@pfd.net
     depends_on:
       - nzbget
     restart: unless-stopped
+
 
   sonarr:
     image: linuxserver/sonarr:latest
