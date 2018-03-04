@@ -52,6 +52,7 @@ services:
       - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:ro
       - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
       - ${NGINX_FILES_PATH}/dhparam:/etc/nginx/dhparam:ro
+      - ${NGINX_FILES_PATH}/proxy.conf:/etc/nginx/proxy.conf:ro
     ports:
       - 80:80
       - 443:443
@@ -252,6 +253,28 @@ services:
       - nzbget
       - nzbhydra
     restart: unless-stopped
+
+  lidarr:
+    image: fish2/docker-lidarr:latest
+    container_name: lidarr
+    volumes:
+      - ${DATA}/config/lidarr:/config
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/audio/music:/music
+      - ${DOWNLOAD}:/downloads
+    ports:
+      - 8686:8686
+    env_file: uidgid.env
+    environment:
+      - VIRTUAL_HOST=lidarr.${HOSTNAME}
+      - VIRTUAL_PORT=8686
+      - LETSENCRYPT_HOST=lidarr.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
+    depends_on:
+      - nzbget
+      - nzbhydra
+    restart: unless-stopped
+
 
   mylar:
     image: claymitchell/mylar:latest
