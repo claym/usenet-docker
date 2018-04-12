@@ -21,6 +21,9 @@ services:
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=${EMAIL_SMTP}
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=${EMAIL_LOGIN}
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=${EMAIL_PASSWORD}
+    logging:
+      options:
+        max-size: 50m
 
   portainer:
     image: portainer/portainer
@@ -35,7 +38,9 @@ services:
       - LETSENCRYPT_EMAIL=clay@pfd.net
       - VIRTUAL_HOST=portainer.${HOSTNAME}
       - VIRTUAL_PORT=9000
-
+    logging:
+      options:
+        max-size: 50m
 
   nginx-proxy:
     labels:
@@ -59,6 +64,9 @@ services:
     environment:
       DEFAULT_HOST: organizr.pfd.net
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   nginx-proxy-ssl:
     image: jrcs/letsencrypt-nginx-proxy-companion:stable
@@ -78,17 +86,21 @@ services:
     depends_on:
       - nginx-proxy
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   plex:
     image: plexinc/pms-docker:plexpass
     container_name: plex
     volumes:
-      - ${DATA}/config/plex:/backup
+      - ${CONFIG}/plex:/backup
       - /opt/plex/config:/config
       - /opt/plex/appdata/plex/transcodes:/transcode
       - ${DATA}/tv:/data/tvshows
       - ${DATA}/movies:/data/movies
       - ${DATA}/audio/music:/data/music
+      - ${DATA}/videos:/data/videos
     ports:
       - 32400:32400/tcp
       - 3005:3005/tcp
@@ -113,31 +125,37 @@ services:
     depends_on:
       - nginx-proxy
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
-  plexpy:
-    image: linuxserver/plexpy:latest
-    container_name: plexpy
+  tautulli:
+    image: tautulli/tautulli:latest
+    container_name: tautulli
     volumes:
-      - ${DATA}/config/plexpy:/config
-      - /etc/localtime:/etc/localtime:ro
+      - ${CONFIG}/tautulli:/config
       - ${PLEXDATA}/Plex Media Server/Logs:/logs:ro
     ports:
       - 8282:8282
     env_file: uidgid.env
     environment:
-      - VIRTUAL_HOST=plexpy.${HOSTNAME}
+      - TZ=America/New_York
+      - VIRTUAL_HOST=tautulli.${HOSTNAME}
       - VIRTUAL_PORT=8282
-      - LETSENCRYPT_HOST=plexpy.${HOSTNAME}
+      - LETSENCRYPT_HOST=tautulli.${HOSTNAME}
       - LETSENCRYPT_EMAIL=clay@pfd.net
     depends_on:
       - plex
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   transmission:
     image: linuxserver/transmission:latest
     container_name: transmission
     volumes:
-      - ${DATA}/config/transmission:/config
+      - ${CONFIG}/transmission:/config
       - ${DOWNLOAD}:/downloads
       - /opt/transmission:/main
       - ${DOWNLOAD}/transmission/watch:/watch
@@ -155,13 +173,15 @@ services:
     depends_on:
       - nginx-proxy
     restart: unless-stopped
-
+    logging:
+      options:
+        max-size: 50m
 
   nzbget:
-    image: linuxserver/nzbget:latest
+    image: linuxserver/nzbget:testing
     container_name: nzbget
     volumes:
-      - ${DATA}/config/nzbget:/config
+      - ${CONFIG}/nzbget:/config
       - ${DOWNLOAD}:/downloads
       - /opt/nzbget:/main
     ports:
@@ -175,12 +195,15 @@ services:
     depends_on:
       - nginx-proxy
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   jackett:
     image: linuxserver/jackett
     container_name: jackett
     volumes:
-      - ${DATA}/config/jackett:/config
+      - ${CONFIG}/jackett:/config
       - ${DOWNLOAD}:/downloads
     ports:
       - 9117:9117
@@ -191,12 +214,15 @@ services:
     depends_on:
       - nginx-proxy
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   nzbhydra:
     image: linuxserver/hydra2:latest
     container_name: nzbhydra
     volumes:
-      - ${DATA}/config/nzbhydra2:/config
+      - ${CONFIG}/nzbhydra2:/config
       - ${DOWNLOAD}/complete:/downloads
       - /etc/localtime:/etc/localtime:ro
     ports:
@@ -210,13 +236,15 @@ services:
     depends_on:
       - nzbget
     restart: unless-stopped
-
+    logging:
+      options:
+        max-size: 50m
 
   sonarr:
     image: linuxserver/sonarr:latest
     container_name: sonarr
     volumes:
-      - ${DATA}/config/sonarr:/config
+      - ${CONFIG}/sonarr:/config
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/tv:/tv
       - ${DOWNLOAD}:/downloads
@@ -232,12 +260,15 @@ services:
       - nzbget
       - nzbhydra
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   radarr:
     image: linuxserver/radarr:latest
     container_name: radarr
     volumes:
-      - ${DATA}/config/radarr:/config
+      - ${CONFIG}/radarr:/config
       - ${DATA}/movies:/movies
       - ${DOWNLOAD}:/downloads
       - /etc/localtime:/etc/localtime:ro
@@ -253,12 +284,15 @@ services:
       - nzbget
       - nzbhydra
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   lidarr:
     image: fish2/docker-lidarr:latest
     container_name: lidarr
     volumes:
-      - ${DATA}/config/lidarr:/config
+      - ${CONFIG}/lidarr:/config
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/audio/music:/music
       - ${DOWNLOAD}:/downloads
@@ -274,13 +308,15 @@ services:
       - nzbget
       - nzbhydra
     restart: unless-stopped
-
+    logging:
+      options:
+        max-size: 50m
 
   mylar:
     image: claymitchell/mylar:latest
     container_name: mylar
     volumes:
-      - ${DATA}/config/mylar:/config
+      - ${CONFIG}/mylar:/config
       - ${DOWNLOAD}:/downloads
       - ${DATA}/comics:/comics
       - /etc/localtime:/etc/localtime:ro
@@ -296,12 +332,15 @@ services:
       - nzbget
       - nzbhydra
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   librarian:
     image: linuxserver/lazylibrarian:latest
     container_name: librarian
     volumes:
-      - ${DATA}/config/librarian:/config
+      - ${CONFIG}/librarian:/config
       - ${DOWNLOAD}:/downloads
       - ${DATA}/books:/books
       - /etc/localtime:/etc/localtime:ro
@@ -317,12 +356,15 @@ services:
       - nzbget
       - nzbhydra
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   headphones:
     image: linuxserver/headphones:latest
     container_name: headphones
     volumes:
-      - ${DATA}/config/headphones:/config
+      - ${CONFIG}/headphones:/config
       - ${DOWNLOAD}:/downloads
       - ${DATA}/audio/music:/music
       - /etc/localtime:/etc/localtime:ro
@@ -338,12 +380,15 @@ services:
       - nzbget
       - nzbhydra
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   ubooquity:
     image: linuxserver/ubooquity:latest
     container_name: ubooquity
     volumes:
-      - ${DATA}/config/ubooquity:/config
+      - ${CONFIG}/ubooquity:/config
       - ${DATA}/books:/books
       - ${DATA}/comics:/comics
       - ${DATA}:/files
@@ -360,12 +405,15 @@ services:
     depends_on:
       - nginx-proxy
     restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   glances:
     image: nicolargo/glances:latest
     container_name: glances
     volumes:
-      - ${DATA}/config/glances:/glances/conf
+      - ${CONFIG}/glances:/glances/conf
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
@@ -381,26 +429,15 @@ services:
     depends_on:
       - nginx-proxy
     restart: unless-stopped
-
-#  muximux:
-#    image: linuxserver/muximux:latest
-#    container_name: muximux
-#    volumes:
-#      - ${DATA}/config/muximux:/config
-#      - /etc/localtime:/etc/localtime:ro
-#    env_file: uidgid.env
-#    environment:
-#      - VIRTUAL_HOST=muximux.${HOSTNAME},home.${HOSTNAME}
-#      - VIRTUAL_PORT=80
-#      - LETSENCRYPT_HOST=muximux.${HOSTNAME},home.${HOSTNAME}
-#      - LETSENCRYPT_EMAIL=${EMAIL}
-#    restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
 
   organizr:
     image: lsiocommunity/organizr:latest
     container_name: organizr
     volumes:
-      - ${DATA}/config/organizr:/config
+      - ${CONFIG}/organizr:/config
       - /etc/localtime:/etc/localtime:ro
     env_file: uidgid.env
     environment:
@@ -411,13 +448,15 @@ services:
     depends_on:
       - nginx-proxy
     restart: unless-stopped
-
+    logging:
+      options:
+        max-size: 50m
 
   ombi:
     image: lsiodev/ombi-preview:latest
     container_name: ombi
     volumes:
-      - ${DATA}/config/ombi:/config
+      - ${CONFIG}/ombi:/config
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 3579:3579
@@ -430,4 +469,6 @@ services:
     depends_on:
       - nginx-proxy
     restart: unless-stopped
-
+    logging:
+      options:
+        max-size: 50m
