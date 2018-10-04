@@ -12,13 +12,15 @@ services:
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /${DOCKER_USER}/.docker/config.json:/config.json
-    command: --interval 3600 --cleanup --debug
+      - /etc/ssl/certs:/etc/ssl/certs
+      #- ${CONFIG}/config.json:/config.json
+    command: --interval 3600 --cleanup
     environment:
       - WATCHTOWER_NOTIFICATIONS=email
       - WATCHTOWER_NOTIFICATION_EMAIL_FROM=${EMAIL_FROM}
       - WATCHTOWER_NOTIFICATION_EMAIL_TO=${EMAIL}
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=${EMAIL_SMTP}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT=${EMAIL_SMTP_PORT}
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=${EMAIL_LOGIN}
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=${EMAIL_PASSWORD}
     logging:
@@ -99,6 +101,7 @@ services:
       - /opt/plex/appdata/plex/transcodes:/transcode
       - ${DATA}/tv:/data/tvshows
       - ${DATA}/movies:/data/movies
+      - ${DATA}/movies-uhd:/data/movies-uhd
       - ${DATA}/audio/music:/data/music
       - ${DATA}/videos:/data/videos
     ports:
@@ -188,6 +191,7 @@ services:
       - 6789:6789
     env_file: uidgid.env
     environment:
+      - TZ=${TZ}
       - VIRTUAL_HOST=nzbget.${HOSTNAME}
       - VIRTUAL_PORT=6789
       - LETSENCRYPT_HOST=nzbget.${HOSTNAME}
@@ -209,6 +213,7 @@ services:
       - 9117:9117
     env_file: uidgid.env
     environment:
+     - TZ=${TZ}
      - VIRTUAL_HOST=jackett.${HOSTNAME}
      - VIRTUAL_PORT=6789
     depends_on:
@@ -224,11 +229,11 @@ services:
     volumes:
       - ${CONFIG}/nzbhydra2:/config
       - ${DOWNLOAD}/complete:/downloads
-      - /etc/localtime:/etc/localtime:ro
     ports:
       - 5076:5076
     env_file: uidgid.env
     environment:
+      - TZ=${TZ}
       - VIRTUAL_HOST=nzbhydra.${HOSTNAME}
       - VIRTUAL_PORT=5076
       - LETSENCRYPT_HOST=nzbhydra.${HOSTNAME}
@@ -245,13 +250,13 @@ services:
     container_name: sonarr
     volumes:
       - ${CONFIG}/sonarr:/config
-      - /etc/localtime:/etc/localtime:ro
       - ${DATA}/tv:/tv
       - ${DOWNLOAD}:/downloads
     ports:
       - 8989:8989
     env_file: uidgid.env
     environment:
+      - TZ=${TZ}
       - VIRTUAL_HOST=sonarr.${HOSTNAME}
       - VIRTUAL_PORT=8989
       - LETSENCRYPT_HOST=sonarr.${HOSTNAME}
@@ -271,11 +276,11 @@ services:
       - ${CONFIG}/radarr:/config
       - ${DATA}/movies:/movies
       - ${DOWNLOAD}:/downloads
-      - /etc/localtime:/etc/localtime:ro
     ports:
       - 7878:7878
     env_file: uidgid.env
     environment:
+      - TZ=${TZ}
       - VIRTUAL_HOST=radarr.${HOSTNAME}
       - VIRTUAL_PORT=7878
       - LETSENCRYPT_HOST=radarr.${HOSTNAME}
@@ -288,18 +293,90 @@ services:
       options:
         max-size: 50m
 
+  radarr-uhd:
+    image: linuxserver/radarr:latest
+    container_name: radarr-uhd
+    volumes:
+      - ${CONFIG}/radarr-uhd:/config
+      - ${DATA}/movies-uhd:/movies
+      - ${DOWNLOAD}:/downloads
+    ports:
+      - 7879:7879
+    env_file: uidgid.env
+    environment:
+      - TZ=${TZ}
+      - VIRTUAL_HOST=radarr-uhd.${HOSTNAME}
+      - VIRTUAL_PORT=7879
+      - LETSENCRYPT_HOST=radarr-uhd.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
+    depends_on:
+      - nzbget
+      - nzbhydra
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
+
+  bazarr:
+    image: linuxserver/bazarr:latest
+    container_name: bazarr
+    volumes:
+      - ${CONFIG}/bazarr:/config
+      - ${DATA}/tv:/tv
+      - ${DATA}/movies:/movies
+      - ${DATA}/movies-uhd:/movies-uhd
+    ports:
+      - 6767:6767
+    env_file: uidgid.env
+    environment:
+      - TZ=${TZ}
+      - VIRTUAL_HOST=bazarr.${HOSTNAME}
+      - VIRTUAL_PORT=6767
+      - LETSENCRYPT_HOST=bazarr.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
+    depends_on:
+      - nzbget
+      - nzbhydra
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
+
+  bazarr-uhd:
+    image: linuxserver/bazarr:latest
+    container_name: bazarr-uhd
+    volumes:
+      - ${CONFIG}/bazarr-uhd:/config
+      - ${DATA}/movies-uhd:/movies
+    ports:
+      - 6768:6768
+    env_file: uidgid.env
+    environment:
+      - TZ=${TZ}
+      - VIRTUAL_HOST=bazarr-uhd.${HOSTNAME}
+      - VIRTUAL_PORT=6768
+      - LETSENCRYPT_HOST=bazarr-uhd.${HOSTNAME}
+      - LETSENCRYPT_EMAIL=clay@pfd.net
+    depends_on:
+      - nzbget
+      - nzbhydra
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 50m
+
   lidarr:
-    image: fish2/docker-lidarr:latest
+    image: linuxserver/lidarr:latest
     container_name: lidarr
     volumes:
       - ${CONFIG}/lidarr:/config
-      - /etc/localtime:/etc/localtime:ro
       - ${DATA}/audio/music:/music
       - ${DOWNLOAD}:/downloads
     ports:
       - 8686:8686
     env_file: uidgid.env
     environment:
+      - TZ=${TZ}
       - VIRTUAL_HOST=lidarr.${HOSTNAME}
       - VIRTUAL_PORT=8686
       - LETSENCRYPT_HOST=lidarr.${HOSTNAME}
@@ -313,17 +390,17 @@ services:
         max-size: 50m
 
   mylar:
-    image: claymitchell/mylar:latest
+    image: claymitchell/mylar:no_locale
     container_name: mylar
     volumes:
       - ${CONFIG}/mylar:/config
       - ${DOWNLOAD}:/downloads
       - ${DATA}/comics:/comics
-      - /etc/localtime:/etc/localtime:ro
     ports:
       - 8090:8090
     env_file: uidgid.env
     environment:
+      - TZ=${TZ}
       - VIRTUAL_HOST=mylar.${HOSTNAME}
       - VIRTUAL_PORT=8090
       - LETSENCRYPT_HOST=mylar.${HOSTNAME}
@@ -343,11 +420,11 @@ services:
       - ${CONFIG}/librarian:/config
       - ${DOWNLOAD}:/downloads
       - ${DATA}/books:/books
-      - /etc/localtime:/etc/localtime:ro
     ports:
       - 5299:5299
     env_file: uidgid.env
     environment:
+      - TZ=${TZ}
       - VIRTUAL_HOST=librarian.${HOSTNAME}
       - VIRTUAL_PORT=5299
       - LETSENCRYPT_HOST=librarian.${HOSTNAME}
@@ -360,29 +437,29 @@ services:
       options:
         max-size: 50m
 
-  headphones:
-    image: linuxserver/headphones:latest
-    container_name: headphones
-    volumes:
-      - ${CONFIG}/headphones:/config
-      - ${DOWNLOAD}:/downloads
-      - ${DATA}/audio/music:/music
-      - /etc/localtime:/etc/localtime:ro
-    ports:
-      - 8181:8181
-    env_file: uidgid.env
-    environment:
-      - VIRTUAL_HOST=headphones.${HOSTNAME}
-      - VIRTUAL_PORT=8181
-      - LETSENCRYPT_HOST=headphones.${HOSTNAME}
-      - LETSENCRYPT_EMAIL=clay@pfd.net
-    depends_on:
-      - nzbget
-      - nzbhydra
-    restart: unless-stopped
-    logging:
-      options:
-        max-size: 50m
+  #headphones:
+  #  image: linuxserver/headphones:latest
+  #  container_name: headphones
+  #  volumes:
+  #    - ${CONFIG}/headphones:/config
+  #    - ${DOWNLOAD}:/downloads
+  #    - ${DATA}/audio/music:/music
+  #    - /etc/localtime:/etc/localtime:ro
+  #  ports:
+  #    - 8181:8181
+  #  env_file: uidgid.env
+  #  environment:
+  #    - VIRTUAL_HOST=headphones.${HOSTNAME}
+  #    - VIRTUAL_PORT=8181
+  #    - LETSENCRYPT_HOST=headphones.${HOSTNAME}
+  #    - LETSENCRYPT_EMAIL=clay@pfd.net
+  #  depends_on:
+  #    - nzbget
+  #    - nzbhydra
+  #  restart: unless-stopped
+  #  logging:
+  #    options:
+  #      max-size: 50m
 
   ubooquity:
     image: linuxserver/ubooquity:latest
@@ -398,6 +475,7 @@ services:
       - 2203:2203
     env_file: uidgid.env
     environment:
+      - TZ=${TZ}
       - VIRTUAL_HOST=ubooquity.${HOSTNAME}
       - VIRTUAL_PORT=2202
       - LETSENCRYPT_HOST=ubooquity.${HOSTNAME}
@@ -414,6 +492,7 @@ services:
     container_name: glances
     volumes:
       - ${CONFIG}/glances:/glances/conf
+      - ${CONFIG}/glances/glances.pwd:/root/.config/glances/glances.pwd
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
@@ -423,7 +502,7 @@ services:
     environment:
       VIRTUAL_HOST: glances.${HOSTNAME}
       VIRTUAL_PORT: 61208
-      GLANCES_OPT: -w --disable-wifi
+      GLANCES_OPT: -w --password
       LETSENCRYPT_HOST: glances.${HOSTNAME}
       LETSENCRYPT_EMAIL: ${EMAIL}
     depends_on:
@@ -462,6 +541,7 @@ services:
       - 3579:3579
     env_file: uidgid.env
     environment:
+      - TZ=${TZ}
       - VIRTUAL_HOST=ombi.${HOSTNAME}
       - VIRTUAL_PORT=3579
       - LETSENCRYPT_HOST=ombi.${HOSTNAME}
