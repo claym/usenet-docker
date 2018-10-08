@@ -4,17 +4,28 @@ This repo is my version of another fork. Setup should be a bit easier but even t
 
 ## Containers
 
-* [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy) - Nginx Proxy 
-* [linuxserver/sonarr](https://github.com/linuxserver/docker-sonarr) - Sonarr 
-* [linuxserver/plexpy](https://github.com/linuxserver/docker-plexpy) - Plexpy 
-* [linuxserver/hydra](https://github.com/linuxserver/docker-hydra) - NZBHydra 
-* [linuxserver/muximux](https://github.com/linuxserver/docker-muximux) - Muximux 
-* [linuxserver/radarr](https://github.com/linuxserver/docker-radarr) - Radarr 
-* [linuxserver/ombi](https://github.com/linuxserver/docker-ombi) - Ombi 
-* [linuxserver/nzbget](https://github.com/linuxserver/docker-nzbget) - NZBGet 
-* [linuxserver/nzbget](https://github.com/linuxserver/docker-ubooquity) - Ubooquity
-* [linuxserver/nzbget](https://github.com/linuxserver/docker-mylar) - Mylar
-
+* plex - Media server
+* jackett - torrent site search proxy
+* nzbhydra - nzb indexer search proxy
+* organizr - HTPC/Homelab Services Organizer
+* ubooquity - Book / Comic library server
+* nzbget - usenet downloader
+* ombi - tv / movie requester
+* transmission - torrent downloader
+* radarr - movie pvr
+* radarr-uhd 
+* lidarr - music pvr
+* librarian - book pvr
+* sonarr - tv pvr
+* glances - system monitoring tool
+* bazarr - subtitle downloader
+* bazarr-uhd
+* tautulli - plex monitoring and tracking tool
+* mylar - comicbook pvr
+* portainer - docker management system
+* nginx-proxy - automated nginx proxy for Docker containers
+* letsencrypt-nginx-proxy-companion - companion container for the nginx-proxy. It allows the creation/renewal of Let's Encrypt certificates automatically
+* watchtower - automatically updates docker containers
 
 ## Docker Setup
 1. Update `./uidgid.env` with the user and group IDs that will be running Docker
